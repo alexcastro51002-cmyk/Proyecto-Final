@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Backoffice Registrar</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="auth">
+    <main class="auth-wrapper">
+      <section class="auth-card">
+        <h1 class="title">Registrar</h1>
+        <form class="form" action="login.html" method="get">
+          <label class="field">
+            <span>Nombre</span>
+            <input type="text" name="name" required />
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required />
+          </label>
+          <label class="field">
+            <span>Contraseña</span>
+            <input type="password" name="password" required />
+          </label>
+          <button type="submit" class="btn primary">Crear cuenta</button>
+        </form>
+        <p class="meta">
+          ¿Ya tienes una cuenta?
+          <a href="login.html">Login</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
