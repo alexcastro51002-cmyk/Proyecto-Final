@@ -1,11 +1,81 @@
+<!-- backoffice/home.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="refresh" content="0; url=login.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Backoffice Home</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body></body>
+  <body class="home">
+    <header class="topbar">
+      <div class="brand">Backoffice</div>
+      <nav class="nav">
+        <button id="btn-add" class="btn ghost">Añadir proyecto</button>
+        <button id="btn-logout" class="btn danger">Cerrar Sesion</button>
+      </nav>
+    </header>
+    <main class="container">
+      <section id="projects-panel" class="panel">
+        <h2 class="panel-title">Tus Proyectos</h2>
+        <div id="projects-list" class="grid"></div>
+      </section>
+      <section id="form-panel" class="panel hidden">
+        <h2 class="panel-title" id="form-title">Nuevo proyecto</h2>
+        <form id="project-form" class="form">
+          <input type="hidden" name="projectId" id="projectId" />
+          <label class="field">
+            <span>Titulo</span>
+            <input type="text" name="title" id="title" required />
+          </label>
+          <label class="field">
+            <span>Descripcion</span>
+            <textarea
+              name="description"
+              id="description"
+              rows="3"
+              required
+            ></textarea>
+          </label>
+          <label class="field">
+            <span>Tecnologias</span>
+            <input
+              type="text"
+              name="technologies"
+              id="technologies"
+              placeholder="react, node, css"
+            />
+          </label>
+          <label class="field">
+            <span>Repositorio</span>
+            <input
+              type="url"
+              name="repository"
+              id="repository"
+              placeholder="https://github.com/user/repo"
+            />
+          </label>
+          <label class="field">
+            <span>Imagenes</span>
+            <input
+              type="text"
+              name="images"
+              id="images"
+              placeholder="https://... , https://..."
+            />
+          </label>
+          <div class="form-row">
+            <button type="submit" class="btn primary" id="btn-save">
+              Guardar
+            </button>
+            <button type="button" class="btn ghost" id="btn-cancel">
+              Cancelar
+            </button>
+          </div>
+        </form>
+        <p id="msg" class="msg" role="status"></p>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
 </html>

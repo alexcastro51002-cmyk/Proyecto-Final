@@ -1,3 +1,4 @@
+<!-- backoffice/register.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,26 +11,46 @@
     <main class="auth-wrapper">
       <section class="auth-card">
         <h1 class="title">Registrar</h1>
-        <form class="form" action="login.html" method="get">
+        <form id="register-form" class="form">
           <label class="field">
             <span>Nombre</span>
-            <input type="text" name="name" required />
+            <input type="text" name="name" minlength="6" required />
           </label>
           <label class="field">
             <span>Email</span>
-            <input type="email" name="email" required />
+            <input type="email" name="email" required autocomplete="email" />
+          </label>
+          <label class="field">
+            <span>Itson ID</span>
+            <input
+              type="text"
+              name="itsonId"
+              id="itsonId"
+              pattern="[0-9]{6}"
+              inputmode="numeric"
+              maxlength="6"
+              required
+            />
           </label>
           <label class="field">
             <span>Contraseña</span>
-            <input type="password" name="password" required />
+            <input
+              type="password"
+              name="password"
+              minlength="6"
+              required
+              autocomplete="new-password"
+            />
           </label>
-          <button type="submit" class="btn primary">Crear cuenta</button>
+          <button type="submit" class="btn primary">Crear Cuenta</button>
         </form>
         <p class="meta">
-          ¿Ya tienes una cuenta?
+          ¿No tienes cuenta?
           <a href="login.html">Login</a>
         </p>
+        <p id="msg" class="msg" role="status"></p>
       </section>
     </main>
+    <script src="app.js"></script>
   </body>
 </html>

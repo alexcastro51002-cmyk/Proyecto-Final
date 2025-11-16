@@ -1,3 +1,4 @@
+<!-- backoffice/login.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,22 +11,29 @@
     <main class="auth-wrapper">
       <section class="auth-card">
         <h1 class="title">Login</h1>
-        <form class="form" action="home.html" method="get">
+        <form id="login-form" class="form">
           <label class="field">
             <span>Email</span>
-            <input type="email" name="email" required />
+            <input type="email" name="email" required autocomplete="email" />
           </label>
           <label class="field">
             <span>Contraseña</span>
-            <input type="password" name="password" required />
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+            />
           </label>
           <button type="submit" class="btn primary">Enter</button>
         </form>
         <p class="meta">
-          ¿No tienes una cuenta?
-          <a href="register.html">Crear una cuenta</a>
+          ¿No tienes cuenta?
+          <a href="register.html">Crear Cuenta</a>
         </p>
+        <p id="msg" class="msg" role="status"></p>
       </section>
     </main>
+    <script src="app.js"></script>
   </body>
 </html>
