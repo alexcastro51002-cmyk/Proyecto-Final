@@ -1,6 +1,5 @@
 const API_BASE = "https://portfolio-api-three-black.vercel.app/api/v1";
 const qs = (s) => document.querySelector(s);
-const qsa = (s) => Array.from(document.querySelectorAll(s));
 const show = (el) => el.classList.remove("hidden");
 const hide = (el) => el.classList.add("hidden");
 const strip = (s) =>
@@ -63,12 +62,12 @@ async function handleRegister() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     setMsg("Registrando...");
-    const formData = new FormData(form);
+    const fd = new FormData(form);
     const payload = {
-      name: formData.get("name").trim(),
-      email: formData.get("email").trim(),
-      itsonId: formData.get("itsonId").trim(),
-      password: formData.get("password"),
+      name: fd.get("name").trim(),
+      email: fd.get("email").trim(),
+      itsonId: fd.get("itsonId").trim(),
+      password: fd.get("password"),
     };
     try {
       await api("/auth/register", {
@@ -128,90 +127,22 @@ async function requireAuth() {
   }
 }
 
-function renderProjects(list) {
-  const wrap = qs("#projects-list");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-  if (!Array.isArray(list) || list.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "card";
-    empty.innerHTML = "<p>Sin proyectos</p>";
-    wrap.appendChild(empty);
-    return;
-  }
-  list.forEach((p) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const techs = Array.isArray(p.technologies) ? p.technologies : [];
-    const imgs = Array.isArray(p.images) ? p.images : [];
-    card.innerHTML = `
-      <h3>${escapeHtml(p.title || "")}</h3>
-      <p>${escapeHtml(p.description || "")}</p>
-      <div class="badges">${techs
-        .map((t) => `<span class="badge">${escapeHtml(t)}</span>`)
-        .join("")}</div>
-      ${
-        p.repository
-          ? `<a href="${
-              p.repository
-            }" target="_blank" rel="noopener noreferrer" class="meta">${escapeHtml(
-              p.repository
-            )}</a>`
-          : ""
-      }
-      ${
-        imgs.length
-          ? `<div class="badges">${imgs
-              .slice(0, 3)
-              .map((u) => `<span class="badge">img</span>`)
-              .join("")}</div>`
-          : ""
-      }
-      <div class="card-actions">
-        <button class="btn ghost" data-edit="${p._id}">Editar</button>
-        <button class="btn danger" data-del="${p._id}">Eliminar</button>
-      </div>
-    `;
-    wrap.appendChild(card);
-  });
-  wrap.addEventListener(
-    "click",
-    async (e) => {
-      const id = e.target.getAttribute("data-del");
-      const eid = e.target.getAttribute("data-edit");
-      if (id) {
-        try {
-          await api(`/projects/${id}`, { method: "DELETE", auth: true });
-          await loadProjects();
-          setMsg("Eliminado", true);
-        } catch (err) {
-          setMsg(err.message);
-        }
-      }
-      if (eid) {
-        enterEditMode(eid);
-      }
-    },
-    { once: true }
-  );
+function parseCsv(v) {
+  if (!v) return [];
+  return v
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
-function enterEditMode(id) {
-  const list = window.__projects || [];
-  const proj = list.find((x) => x._id === id);
-  if (!proj) return;
-  showForm();
-  qs("#form-title").textContent = "Editar proyecto";
-  qs("#projectId").value = proj._id || "";
-  qs("#title").value = proj.title || "";
-  qs("#description").value = proj.description || "";
-  qs("#technologies").value = Array.isArray(proj.technologies)
-    ? proj.technologies.join(", ")
-    : "";
-  qs("#repository").value = proj.repository || "";
-  qs("#images").value = Array.isArray(proj.images)
-    ? proj.images.join(", ")
-    : "";
+function escapeHtml(s) {
+  return String(s).replace(
+    /[&<>"']/g,
+    (m) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
+        m
+      ])
+  );
 }
 
 function resetForm() {
@@ -243,29 +174,102 @@ async function loadProjects() {
   }
 }
 
-function parseCsv(v) {
-  if (!v) return [];
-  return v
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+async function getProject(id) {
+  try {
+    const data = await api(`/projects/${id}`, { auth: true });
+    return data && data.project ? data.project : data;
+  } catch {
+    return null;
+  }
 }
 
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"']/g,
-    (m) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
-        m
-      ])
-  );
+function renderProjects(list) {
+  const wrap = qs("#projects-list");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  if (!Array.isArray(list) || list.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "card";
+    empty.innerHTML = "<p>Sin proyectos</p>";
+    wrap.appendChild(empty);
+  } else {
+    list.forEach((p) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      const techs = Array.isArray(p.technologies) ? p.technologies : [];
+      const imgs = Array.isArray(p.images) ? p.images : [];
+      card.innerHTML = `
+        <h3>${escapeHtml(p.title || "")}</h3>
+        <p>${escapeHtml(p.description || "")}</p>
+        <div class="badges">${techs
+          .map((t) => `<span class="badge">${escapeHtml(t)}</span>`)
+          .join("")}</div>
+        ${
+          p.repository
+            ? `<a href="${
+                p.repository
+              }" target="_blank" rel="noopener noreferrer" class="meta">${escapeHtml(
+                p.repository
+              )}</a>`
+            : ""
+        }
+        ${
+          imgs.length
+            ? `<div class="badges">${imgs
+                .slice(0, 3)
+                .map((u) => `<span class="badge">img</span>`)
+                .join("")}</div>`
+            : ""
+        }
+        <div class="card-actions">
+          <button class="btn ghost" data-edit="${p._id}">Editar</button>
+          <button class="btn danger" data-del="${p._id}">Eliminar</button>
+        </div>
+      `;
+      wrap.appendChild(card);
+    });
+  }
+  wrap.onclick = async (e) => {
+    const id = e.target.getAttribute("data-del");
+    const eid = e.target.getAttribute("data-edit");
+    if (id) {
+      try {
+        await api(`/projects/${id}`, { method: "DELETE", auth: true });
+        await loadProjects();
+        setMsg("Eliminado", true);
+      } catch (err) {
+        setMsg(err.message);
+      }
+    }
+    if (eid) {
+      await enterEditMode(eid);
+    }
+  };
+}
+
+async function enterEditMode(id) {
+  let proj =
+    (window.__projects || []).find((x) => x._id === id) ||
+    (await getProject(id));
+  if (!proj) return;
+  showForm();
+  qs("#form-title").textContent = "Editar proyecto";
+  qs("#projectId").value = proj._id || "";
+  qs("#title").value = proj.title || "";
+  qs("#description").value = proj.description || "";
+  qs("#technologies").value = Array.isArray(proj.technologies)
+    ? proj.technologies.join(", ")
+    : "";
+  qs("#repository").value = proj.repository || "";
+  qs("#images").value = Array.isArray(proj.images)
+    ? proj.images.join(", ")
+    : "";
 }
 
 async function handleHome() {
   if (!qs(".home")) return;
   const ok = await requireAuth();
   if (!ok) return;
-  const user = getUser();
   await loadProjects();
   const add = qs("#btn-add");
   const logout = qs("#btn-logout");
@@ -291,18 +295,15 @@ async function handleHome() {
     const payload = {
       title: fd.get("title").trim(),
       description: fd.get("description").trim(),
-      userId: user && (user.id || user._id) ? user.id || user._id : "",
       technologies: parseCsv(fd.get("technologies")),
       repository: fd.get("repository").trim() || undefined,
       images: parseCsv(fd.get("images")),
     };
     try {
       if (id) {
-        const updates = Object.assign({}, payload);
-        delete updates.userId;
         await api(`/projects/${id}`, {
           method: "PUT",
-          body: JSON.stringify(updates),
+          body: JSON.stringify(payload),
           auth: true,
         });
         setMsg("Actualizado", true);
@@ -310,40 +311,6 @@ async function handleHome() {
         await api("/projects", {
           method: "POST",
           body: JSON.stringify(payload),
-          auth: true,
-        });
-        setMsg("Creado", true);
-      }
-      hideForm();
-      await loadProjects();
-    } catch (err) {
-      setMsg(err.message);
-    }
-  });
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    setMsg("Guardando...");
-    const fd = new FormData(form);
-    const id = fd.get("projectId");
-    const payloadBase = {
-      title: fd.get("title").trim(),
-      description: fd.get("description").trim(),
-      technologies: parseCsv(fd.get("technologies")),
-      repository: fd.get("repository").trim() || undefined,
-      images: parseCsv(fd.get("images")),
-    };
-    try {
-      if (id) {
-        await api(`/projects/${id}`, {
-          method: "PUT",
-          body: JSON.stringify(payloadBase),
-          auth: true,
-        });
-        setMsg("Actualizado", true);
-      } else {
-        await api("/projects", {
-          method: "POST",
-          body: JSON.stringify(payloadBase),
           auth: true,
         });
         setMsg("Creado", true);
